@@ -235,16 +235,23 @@ function Admin() {
                       {a.points})
                     </span>
                   </span>
-                  <span
-                    className={
-                      "rounded-full px-3 py-1 text-xs font-semibold " +
-                      (a.status === "approved"
-                        ? "bg-brand-soft text-brand ring-1 ring-brand/20"
-                        : "bg-secondary text-destructive")
-                    }
-                  >
-                    {a.status === "approved" ? "Tassyklandy" : "Ret edildi"}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={
+                        "rounded-full px-3 py-1 text-xs font-semibold " +
+                        (a.status === "approved"
+                          ? "bg-brand-soft text-brand ring-1 ring-brand/20"
+                          : "bg-secondary text-destructive")
+                      }
+                    >
+                      {a.status === "approved" ? "Tassyklandy" : "Ret edildi"}
+                    </span>
+                    {a.approvedAt && (
+                      <span className="text-xs text-muted-foreground">
+                        {formatDateTime(a.approvedAt)}
+                      </span>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
