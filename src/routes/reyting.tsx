@@ -24,9 +24,9 @@ function Reyting() {
   const [q, setQ] = useState("");
   const [selectedStudent, setSelectedStudent] = useState<(Student & { points: number }) | null>(null);
   const { all } = useScopedStudents();
-  const { isAdmin, faculty: myFaculty } = useSession();
+  const { isAdmin } = useSession();
   const [allFaculties] = useFaculties();
-  const faculties = isAdmin ? allFaculties : myFaculty ? [myFaculty] : [];
+  const faculties = allFaculties;
   const [awards] = usePointAwards();
   const list = all
     .filter(

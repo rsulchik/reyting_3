@@ -31,8 +31,8 @@ function Index() {
   const [awards] = usePointAwards();
   const [allFaculties] = useFaculties();
   const [groups] = useGroups();
-  const { isAdmin, faculty: myFaculty } = useSession();
-  const faculties = isAdmin ? allFaculties : myFaculty ? [myFaculty] : allFaculties;
+  const { isAdmin } = useSession();
+  const faculties = allFaculties;
 
   const [faculty, setFaculty] = useState("");
   const [group, setGroup] = useState("");
@@ -102,24 +102,21 @@ function Index() {
                   {s.initials}
                 </div>
               ))}
-              <div className="grid size-10 place-items-center rounded-full bg-secondary text-[10px] font-bold text-muted-foreground ring-2 ring-paper">
-                +400
-              </div>
             </div>
           </div>
         </div>
         <div className="grid grid-cols-2 gap-4 lg:col-span-5">
           <div className="space-y-1 rounded-2xl bg-card p-6 ring-1 ring-black/5">
             <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-              Jemi teswirler
+              Fakultet sany
             </span>
-            <div className="font-display text-3xl font-medium">12,480</div>
+            <div className="font-display text-3xl font-medium">4</div>
           </div>
           <div className="space-y-1 rounded-2xl bg-brand p-6 text-white ring-1 ring-brand">
             <span className="text-xs font-medium uppercase tracking-wider text-white/60">
-              Aktiw talyp
+              Talyplaryň sany
             </span>
-            <div className="font-display text-3xl font-medium">2,140</div>
+            <div className="font-display text-3xl font-medium">1,140</div>
           </div>
         </div>
       </section>
