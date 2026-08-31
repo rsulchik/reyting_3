@@ -21,6 +21,7 @@ export type PointAward = {
   fromName: string;
   createdAt: number;
   status: AwardStatus;
+  approvedAt?: number;
   files?: AwardFile[];
 };
 
@@ -43,6 +44,16 @@ export function formatWhen(ts: number) {
   const h = Math.round(min / 60);
   if (h < 24) return `${h} sagat öň`;
   return `${Math.round(h / 24)} gün öň`;
+}
+
+export function formatDateTime(ts: number) {
+  return new Date(ts).toLocaleString("ru-RU", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
 
 export const ALLOWED_FILE_TYPES = ["application/pdf", "image/jpeg", "image/jpg"];

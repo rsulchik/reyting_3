@@ -1,9 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
+import { StudentWorksDialog } from "@/components/student-works-dialog";
 import { useScopedStudents } from "@/lib/students-store";
 import { useFaculties } from "@/lib/taxonomy";
 import { useSession } from "@/lib/auth";
 import { usePointAwards, totalPoints } from "@/lib/point-awards";
+import type { Student } from "@/lib/mock-data";
 
 export const Route = createFileRoute("/reyting")({
   head: () => ({
@@ -20,6 +22,7 @@ export const Route = createFileRoute("/reyting")({
 function Reyting() {
   const [scope, setScope] = useState<"all" | string>("all");
   const [q, setQ] = useState("");
+  const [selectedStudent, setSelectedStudent] = useState<(Student & { points: number }) | null>(null);
   const { all } = useScopedStudents();
   const { isAdmin, faculty: myFaculty } = useSession();
   const [allFaculties] = useFaculties();
@@ -95,7 +98,11 @@ function Reyting() {
           </thead>
           <tbody>
             {list.map((s, i) => (
-              <tr key={s.id} className="border-t border-border transition hover:bg-secondary/40">
+              <tr
+                key={s.id}
+                onClick={() => setSelectedStudent(s)}
+                className="cursor-pointer border-t border-border transition hover:bg-secondary/40"
+              >
                 <td className="px-6 py-4 font-display text-sm text-muted-foreground">
                   {String(i + 1).padStart(2, "0")}
                 </td>
@@ -144,6 +151,15 @@ function Reyting() {
           </tbody>
         </table>
       </div>
+
+      <StudentWorksDialog
+        student={selectedStudent}
+        awards={awards}
+        open={selectedStudent !== null}
+        onOpenChange={(open) => {
+          if (!open) setSelectedStudent(null);
+        }}
+      />
     </main>
   );
 }

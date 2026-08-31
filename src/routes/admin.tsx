@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
+import { AwardFilePreviewDialog } from "@/components/award-file-preview-dialog";
 import { POINT_RULES, type PointRule } from "@/lib/mock-data";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import {
@@ -51,6 +52,7 @@ function Admin() {
   const { all: allStudents } = useScopedStudents();
   const { isAdmin } = useSession();
   const activeTab = !isAdmin && tab !== "members" && tab !== "penalties" ? "members" : tab;
+  const [previewFile, setPreviewFile] = useState<AwardFile | null>(null);
 
 
 
@@ -82,6 +84,7 @@ function Admin() {
           : [
               ["members", "Ball ber"],
               ["penalties", "Talyba temmi çäre bellemek"],
+              ["moderation", "Moderasiýa"],
             ]
         ).map(([key, label]) => (
 
@@ -142,7 +145,7 @@ function Admin() {
         <MembersTab rules={rules} awards={awards} setAwards={setAwards} limited={!isAdmin} />
       )}
 
-      {activeTab === "moderation" && isAdmin && (
+      {activeTab === "moderation" && (
         <section className="space-y-8">
           <div className="space-y-3">
             <h2 className="text-lg font-semibold">Tassyklanmaga garaşýan ballar</h2>
@@ -178,23 +181,25 @@ function Admin() {
                   {a.files && a.files.length > 0 && (
                     <div className="flex flex-wrap gap-2">
                       {a.files.map((f) => (
-                        <a
+                        <button
                           key={f.name}
-                          href={f.dataUrl}
-                          download={f.name}
-                          target="_blank"
-                          rel="noreferrer"
+                          type="button"
+                          onClick={() => setPreviewFile(f)}
                           className="rounded-full bg-secondary px-3 py-1 text-xs font-medium text-brand ring-1 ring-brand/20"
                         >
                           📎 {f.name}
-                        </a>
+                        </button>
                       ))}
                     </div>
                   )}
                   <div className="flex gap-2">
                     <button
                       onClick={() =>
-                        setAwards(awards.map((x) => (x.id === a.id ? { ...x, status: "approved" } : x)))
+                        setAwards(
+                          awards.map((x) =>
+                            x.id === a.id ? { ...x, status: "approved", approvedAt: Date.now() } : x,
+                          ),
+                        )
                       }
                       className="rounded-lg bg-brand px-3 py-1.5 text-xs font-semibold text-white"
                     >
@@ -247,6 +252,14 @@ function Admin() {
       )}
 
       {activeTab === "groups" && <GroupsTab />}
+
+      <AwardFilePreviewDialog
+        file={previewFile}
+        open={previewFile !== null}
+        onOpenChange={(open) => {
+          if (!open) setPreviewFile(null);
+        }}
+      />
     </main>
   );
 }

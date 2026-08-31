@@ -1,9 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
+import { StudentWorksDialog } from "@/components/student-works-dialog";
 import { groupsForFaculty, useGroups, useScopedStudents } from "@/lib/students-store";
 import { useFaculties } from "@/lib/taxonomy";
 import { useSession } from "@/lib/auth";
 import { usePointAwards, totalPoints } from "@/lib/point-awards";
+import type { Student } from "@/lib/mock-data";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -35,6 +37,7 @@ function Index() {
   const [faculty, setFaculty] = useState("");
   const [group, setGroup] = useState("");
   const [course, setCourse] = useState<number | "">("");
+  const [selectedStudent, setSelectedStudent] = useState<(Student & { points: number }) | null>(null);
 
   const activeFaculty = faculty && faculties.includes(faculty) ? faculty : (faculties[0] ?? "");
 
@@ -197,9 +200,11 @@ function Index() {
         </div>
         <div className="space-y-3">
           {ranked.map((s, i) => (
-            <div
+            <button
               key={s.id}
-              className="flex items-center rounded-2xl bg-card p-4 ring-1 ring-black/5"
+              type="button"
+              onClick={() => setSelectedStudent(s)}
+              className="flex w-full items-center rounded-2xl bg-card p-4 text-left ring-1 ring-black/5 transition hover:bg-secondary/40 hover:ring-brand/20"
             >
               <span className="w-8 font-display font-medium text-muted-foreground">
                 {String(i + 1).padStart(2, "0")}
@@ -225,7 +230,7 @@ function Index() {
                 <div className="text-sm font-semibold text-brand">{s.points}</div>
                 <div className="text-[10px] uppercase text-muted-foreground">Ball</div>
               </div>
-            </div>
+            </button>
           ))}
           {ranked.length === 0 && (
             <div className="rounded-2xl bg-card p-8 text-center text-sm text-muted-foreground ring-1 ring-black/5">
@@ -234,6 +239,15 @@ function Index() {
           )}
         </div>
       </section>
+
+      <StudentWorksDialog
+        student={selectedStudent}
+        awards={awards}
+        open={selectedStudent !== null}
+        onOpenChange={(open) => {
+          if (!open) setSelectedStudent(null);
+        }}
+      />
     </main>
   );
 }
