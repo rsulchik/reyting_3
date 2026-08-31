@@ -93,16 +93,6 @@ function Index() {
             >
               Reýtingi gör
             </Link>
-            <div className="flex -space-x-2">
-              {all.slice(0, 3).map((s) => (
-                <div
-                  key={s.id}
-                  className="grid size-10 place-items-center rounded-full bg-brand-soft text-[10px] font-semibold text-brand ring-2 ring-paper"
-                >
-                  {s.initials}
-                </div>
-              ))}
-            </div>
           </div>
         </div>
         <div className="grid grid-cols-2 gap-4 lg:col-span-5">
