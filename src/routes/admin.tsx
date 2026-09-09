@@ -247,7 +247,7 @@ function Admin() {
                     </span>
                     {a.approvedAt && (
                       <span className="text-xs text-muted-foreground">
-                        {formatDateTime(a.approvedAt)}
+                        {formatWhen(a.approvedAt)}
                       </span>
                     )}
                   </div>
