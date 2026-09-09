@@ -26,7 +26,7 @@ import { useFaculties, useCategories, usePenalties, type Category } from "@/lib/
 export const Route = createFileRoute("/admin")({
   head: () => ({
     meta: [
-      { title: "Admin paneli — StudRate" },
+      { title: "Turkmenistanyn Milli Konserwwatoriyasy" },
       { name: "description", content: "Ölçegleri, kategoriýalary, ballary we temmi çäreleri dolandyryň." },
       { property: "og:title", content: "Admin paneli — StudRate" },
       { property: "og:description", content: "Ölçegleri, kategoriýalary, ballary we temmi çäreleri dolandyryň." },
@@ -1012,7 +1012,7 @@ function MembersTab({
             <input
               value={form.lastName}
               onChange={(e) => setForm({ ...form, lastName: e.target.value })}
-              placeholder="Amanow"
+              placeholder="Sopyýew"
               className={input}
             />
           </div>
@@ -1021,7 +1021,7 @@ function MembersTab({
             <input
               value={form.firstName}
               onChange={(e) => setForm({ ...form, firstName: e.target.value })}
-              placeholder="Kerim"
+              placeholder="Nazguly"
               className={input}
             />
           </div>
@@ -1094,7 +1094,7 @@ function MembersTab({
             <input
               value={form.newGroup}
               onChange={(e) => setForm({ ...form, newGroup: e.target.value })}
-              placeholder="ýa-da täze topar"
+              placeholder="ýa-da topar goşmak"
               className="w-full rounded-xl bg-secondary px-4 py-2 text-xs ring-1 ring-black/10 outline-none focus:ring-brand"
             />
           </div>

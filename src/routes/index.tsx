@@ -2,9 +2,9 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { StudentWorksDialog } from "@/components/student-works-dialog";
 import { groupsForFaculty, useGroups, useScopedStudents } from "@/lib/students-store";
-import { useFaculties } from "@/lib/taxonomy";
+import { useFaculties, useCategories } from "@/lib/taxonomy";
 import { useSession } from "@/lib/auth";
-import { usePointAwards, totalPoints } from "@/lib/point-awards";
+import { usePointAwards, usePointRules, totalPoints } from "@/lib/point-awards";
 import type { Student } from "@/lib/mock-data";
 
 export const Route = createFileRoute("/")({
@@ -29,32 +29,44 @@ const select =
 function Index() {
   const { all } = useScopedStudents();
   const [awards] = usePointAwards();
+  const [rules] = usePointRules();
   const [allFaculties] = useFaculties();
+  const [categories] = useCategories();
   const [groups] = useGroups();
   const { isAdmin } = useSession();
   const faculties = allFaculties;
 
-  const [faculty, setFaculty] = useState("");
-  const [group, setGroup] = useState("");
+  const [faculty, setFaculty] = useState("all");
+  const [group, setGroup] = useState("all");
   const [course, setCourse] = useState<number | "">("");
+  const [category, setCategory] = useState("all");
   const [selectedStudent, setSelectedStudent] = useState<(Student & { points: number }) | null>(null);
 
-  const activeFaculty = faculty && faculties.includes(faculty) ? faculty : (faculties[0] ?? "");
+  const activeFaculty = faculty === "all" || !faculties.includes(faculty) ? "all" : faculty;
 
   const availableGroups = useMemo(() => {
+    if (activeFaculty === "all") {
+      const fromRegistry = groups.map((g) => g.name);
+      const fromStudents = all.map((s) => s.group);
+      return [...new Set([...fromRegistry, ...fromStudents])].sort();
+    }
     const fromRegistry = groupsForFaculty(groups, activeFaculty).map((g) => g.name);
     const fromStudents = all.filter((s) => s.faculty === activeFaculty).map((s) => s.group);
     return [...new Set([...fromRegistry, ...fromStudents])].sort();
   }, [groups, activeFaculty, all]);
 
-  const activeGroup = group && availableGroups.includes(group) ? group : (availableGroups[0] ?? "");
+  const activeGroup = group === "all" || !availableGroups.includes(group) ? "all" : group;
 
   const availableCourses = useMemo(
     () =>
       [
         ...new Set(
           all
-            .filter((s) => s.faculty === activeFaculty && s.group === activeGroup)
+            .filter(
+              (s) =>
+                (activeFaculty === "all" || s.faculty === activeFaculty) &&
+                (activeGroup === "all" || s.group === activeGroup),
+            )
             .map((s) => s.course),
         ),
       ].sort((a, b) => a - b),
@@ -64,16 +76,31 @@ function Index() {
   const activeCourse =
     course !== "" && availableCourses.includes(course) ? course : (availableCourses[0] ?? null);
 
-  const ranked = all
-    .filter(
+  const ranked = useMemo(() => {
+    const filtered = all.filter(
       (s) =>
-        s.faculty === activeFaculty &&
-        s.group === activeGroup &&
-        activeCourse !== null &&
-        s.course === activeCourse,
-    )
-    .map((s) => ({ ...s, points: totalPoints(awards, s.id) }))
-    .sort((a, b) => b.points - a.points);
+        (activeFaculty === "all" || s.faculty === activeFaculty) &&
+        (activeGroup === "all" || s.group === activeGroup) &&
+        (activeCourse === null || s.course === activeCourse),
+    );
+
+    const withCategoryFilter =
+      category === "all"
+        ? filtered
+        : filtered.filter((s) => {
+            const studentAwards = awards.filter(
+              (a) => a.studentId === s.id && a.status === "approved",
+            );
+            const categoryRules = rules.filter((r) => r.categoryId === category);
+            return studentAwards.some((award) =>
+              categoryRules.some((rule) => rule.action === award.action),
+            );
+          });
+
+    return withCategoryFilter
+      .map((s) => ({ ...s, points: totalPoints(awards, s.id) }))
+      .sort((a, b) => b.points - a.points);
+  }, [all, activeFaculty, activeGroup, activeCourse, category, awards, rules]);
 
   return (
     <main className="mx-auto max-w-7xl space-y-20 px-6 py-12">
@@ -123,11 +150,12 @@ function Index() {
                 value={activeFaculty}
                 onChange={(e) => {
                   setFaculty(e.target.value);
-                  setGroup("");
+                  setGroup("all");
                   setCourse("");
                 }}
                 className={select}
               >
+                <option value="all">Ähli fakultet</option>
                 {faculties.map((f) => (
                   <option key={f} value={f}>
                     {f}
@@ -148,15 +176,12 @@ function Index() {
                 disabled={availableGroups.length === 0}
                 className={select + " disabled:opacity-40"}
               >
-                {availableGroups.length === 0 ? (
-                  <option value="">Topar ýok</option>
-                ) : (
-                  availableGroups.map((g) => (
-                    <option key={g} value={g}>
-                      {g}
-                    </option>
-                  ))
-                )}
+                <option value="all">Ähli topar</option>
+                {availableGroups.map((g) => (
+                  <option key={g} value={g}>
+                    {g}
+                  </option>
+                ))}
               </select>
             </div>
             <div className="space-y-1">
@@ -169,15 +194,29 @@ function Index() {
                 disabled={availableCourses.length === 0}
                 className={select + " disabled:opacity-40"}
               >
-                {availableCourses.length === 0 ? (
-                  <option value="">Kurs ýok</option>
-                ) : (
-                  availableCourses.map((c) => (
-                    <option key={c} value={c}>
-                      {c}-nji ýyl
-                    </option>
-                  ))
-                )}
+                <option value="">Ähli kurs</option>
+                {availableCourses.map((c) => (
+                  <option key={c} value={c}>
+                    {c}-nji ýyl
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="space-y-1">
+              <label className="px-1 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+                Kategoriýa
+              </label>
+              <select
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                className={select}
+              >
+                <option value="all">Ähli kategoriýa</option>
+                {categories.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
+                ))}
               </select>
             </div>
             <Link to="/reyting" className="pb-2 text-sm font-medium text-brand">
