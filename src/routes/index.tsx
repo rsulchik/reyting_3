@@ -2,9 +2,9 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { StudentWorksDialog } from "@/components/student-works-dialog";
 import { groupsForFaculty, useGroups, useScopedStudents } from "@/lib/students-store";
-import { useFaculties, useCategories } from "@/lib/taxonomy";
+import { useFaculties } from "@/lib/taxonomy";
 import { useSession } from "@/lib/auth";
-import { usePointAwards, usePointRules, totalPoints } from "@/lib/point-awards";
+import { usePointAwards, totalPoints } from "@/lib/point-awards";
 import type { Student } from "@/lib/mock-data";
 
 export const Route = createFileRoute("/")({
@@ -29,9 +29,7 @@ const select =
 function Index() {
   const { all } = useScopedStudents();
   const [awards] = usePointAwards();
-  const [rules] = usePointRules();
   const [allFaculties] = useFaculties();
-  const [categories] = useCategories();
   const [groups] = useGroups();
   const { isAdmin } = useSession();
   const faculties = allFaculties;
@@ -39,7 +37,6 @@ function Index() {
   const [faculty, setFaculty] = useState("all");
   const [group, setGroup] = useState("all");
   const [course, setCourse] = useState<number | "">("");
-  const [category, setCategory] = useState("all");
   const [selectedStudent, setSelectedStudent] = useState<(Student & { points: number }) | null>(null);
 
   const activeFaculty = faculty === "all" || !faculties.includes(faculty) ? "all" : faculty;
@@ -77,30 +74,16 @@ function Index() {
     course !== "" && availableCourses.includes(course) ? course : (availableCourses[0] ?? null);
 
   const ranked = useMemo(() => {
-    const filtered = all.filter(
-      (s) =>
-        (activeFaculty === "all" || s.faculty === activeFaculty) &&
-        (activeGroup === "all" || s.group === activeGroup) &&
-        (activeCourse === null || s.course === activeCourse),
-    );
-
-    const withCategoryFilter =
-      category === "all"
-        ? filtered
-        : filtered.filter((s) => {
-            const studentAwards = awards.filter(
-              (a) => a.studentId === s.id && a.status === "approved",
-            );
-            const categoryRules = rules.filter((r) => r.categoryId === category);
-            return studentAwards.some((award) =>
-              categoryRules.some((rule) => rule.action === award.action),
-            );
-          });
-
-    return withCategoryFilter
+    return all
+      .filter(
+        (s) =>
+          (activeFaculty === "all" || s.faculty === activeFaculty) &&
+          (activeGroup === "all" || s.group === activeGroup) &&
+          (activeCourse === null || s.course === activeCourse),
+      )
       .map((s) => ({ ...s, points: totalPoints(awards, s.id) }))
       .sort((a, b) => b.points - a.points);
-  }, [all, activeFaculty, activeGroup, activeCourse, category, awards, rules]);
+  }, [all, activeFaculty, activeGroup, activeCourse, awards]);
 
   return (
     <main className="mx-auto max-w-7xl space-y-20 px-6 py-12">
@@ -198,23 +181,6 @@ function Index() {
                 {availableCourses.map((c) => (
                   <option key={c} value={c}>
                     {c}-nji ýyl
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="space-y-1">
-              <label className="px-1 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
-                Kategoriýa
-              </label>
-              <select
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                className={select}
-              >
-                <option value="all">Ähli kategoriýa</option>
-                {categories.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name}
                   </option>
                 ))}
               </select>

@@ -84,7 +84,6 @@ function Admin() {
           : [
               ["members", "Ball ber"],
               ["penalties", "Talyba temmi çäre bellemek"],
-              ["moderation", "Moderasiýa"],
               ["categories", "Kategoriýalar"],
             ]
         ).map(([key, label]) => (
