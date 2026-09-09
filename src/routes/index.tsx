@@ -205,10 +205,10 @@ function Index() {
                 <img
                   src={s.photo}
                   alt={s.fullName}
-                  className="mx-4 size-12 shrink-0 rounded-xl object-cover ring-1 ring-black/5"
+                  className="mx-4 w-16 h-20 shrink-0 rounded-xl object-cover ring-1 ring-black/5"
                 />
               ) : (
-                <div className="mx-4 grid size-12 shrink-0 place-items-center rounded-xl bg-brand-soft text-sm font-semibold text-brand ring-1 ring-black/5">
+                <div className="mx-4 grid w-16 h-20 shrink-0 place-items-center rounded-xl bg-brand-soft text-sm font-semibold text-brand ring-1 ring-black/5">
                   {s.initials}
                 </div>
               )}

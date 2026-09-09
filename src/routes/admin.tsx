@@ -5,7 +5,7 @@ import { POINT_RULES, type PointRule } from "@/lib/mock-data";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import {
   usePointAwards,
-  formatWhen,
+  formatDateTime,
   readAwardFiles,
   readImageDataUrl,
   totalPoints,
@@ -51,7 +51,7 @@ function Admin() {
   const decidedAwards = awards.filter((a) => a.status !== "pending");
   const { all: allStudents } = useScopedStudents();
   const { isAdmin } = useSession();
-  const activeTab = !isAdmin && tab !== "members" && tab !== "penalties" ? "members" : tab;
+  const activeTab = !isAdmin && tab !== "members" && tab !== "penalties" && tab !== "categories" ? "members" : tab;
   const [previewFile, setPreviewFile] = useState<AwardFile | null>(null);
 
 
@@ -160,7 +160,7 @@ function Admin() {
                     <div>
                       <span className="font-semibold text-ink">{a.fromName}</span> → {a.studentName}
                     </div>
-                    <span>{formatWhen(a.createdAt)}</span>
+                    <span>{formatDateTime(a.createdAt)}</span>
                   </div>
                   <div className="flex flex-wrap items-center gap-3">
                     <span className="text-sm font-semibold">{a.action}</span>
@@ -247,7 +247,7 @@ function Admin() {
                     </span>
                     {a.approvedAt && (
                       <span className="text-xs text-muted-foreground">
-                        {formatWhen(a.approvedAt)}
+                        {formatDateTime(a.approvedAt)}
                       </span>
                     )}
                   </div>
